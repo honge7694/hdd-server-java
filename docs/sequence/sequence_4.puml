@@ -1,0 +1,52 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "Order Controller" as oc
+participant "Order Service" as os
+participant "UserRepository" as ur
+participant "User" as u
+participant "Order Repository" as or
+participant "External Data Platform" as edp
+
+group Step 1. 주문 요청
+    autonumber 1 "(0)"
+    sc -> oc : POST /orders/ (orderRequestDto)
+    oc -> os : orderRequestDto
+end
+
+group Step 2. 잔액 조회
+    os -> ur : getUser(userId)
+    ur --> os : user: User
+end
+
+group Step 3. 결제 및 저장
+    os -> u : deductBalance(결제금액)
+    u --> os : 차감 된 금액
+    os -> ur : save(user)
+    ur --> os  : user: User
+end
+
+group Step 4. 주문 저장
+    os -> or : orderSave(orderRequestDto)
+    or --> os : orderResponseDto
+end
+
+group Step 5. 외부 데이터 플랫폼 전송
+    os -> edp : sendOrderData(order)
+    edp --> os : 전송 성공 여부
+end
+
+group Step 6. 응답 반환
+    os --> oc : orderResponseDto
+    oc --> sc : HTTP 200 OK (주문 완료)
+end
+
+alt Step 2. 잔액 부족할 경우
+    os --> oc : NotEnoughBalanceException
+    oc --> sc : HTTP 400 Bad Request, "금액 부족"
+end
+
+@enduml
