@@ -1,0 +1,73 @@
+@startuml
+
+class User {
+    - id: Long
+    - name: String
+    - address: Address
+    - balance: int
+    + chargeBalance(amount: int): void
+    + deductBalance(amount: int): void
+}
+
+class UserHistory {
+    - id: Long
+    - userId: Long
+    - amount: int
+    - transactionType: TransactionType
+    - createDate: Date
+}
+
+class Address {
+    - city: String
+    - street: String
+    - zipcode: String
+}
+
+enum TransactionType {
+    - CHARGE
+    - USE
+}
+
+class Order {
+    - id: Long
+    - userId: Long
+    - orderDate: Date
+    + create(): void
+}
+
+class OrderItem {
+    - id: Long
+    - orderId: Long
+    - productId: Long
+    - price: Long
+    - quantity: Long
+    + totalPrice(): Long
+}
+
+class Product {
+    - id: Long
+    - name: String
+    - price: int
+    - stockQuantity: int
+'    - totalSold: int
+'    + increaseSoldCount(quantity: int): void
+}
+
+' 판매량을 조회를 위해 분리
+class ProductSales {
+    - id: Long
+    - productId: Long
+    - totalSold: Long
+    - lastSoldAt: LocalDateTime
+    + increaseSales(quantity: int): void
+}
+
+' 관계 정의
+User "1" --> "*" UserHistory
+User "1" --> "*" Order
+Order "1" -- "*" OrderItem
+OrderItem "*" --> "1" Product
+Product "1" --> "1" ProductSales
+
+
+@enduml
