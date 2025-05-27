@@ -14,7 +14,7 @@ class UserHistory {
     - userId: Long
     - amount: int
     - transactionType: TransactionType
-    - createDate: Date
+    - createDate: LocalDateTime
 }
 
 class Address {
@@ -28,10 +28,27 @@ enum TransactionType {
     - USE
 }
 
+class Coupon {
+    - id: Long
+    - code: String
+    - discountAmount: int
+    - issuedAt: LocalDateTime
+    - expiredAt: LocalDateTime
+    - quantity: int
+}
+
+class UserCoupon {
+    - id: Long
+    - userId: Long
+    - couponId: Long
+    - used: Boolean
+    - usedAt: LocalDateTime
+}
+
 class Order {
     - id: Long
     - userId: Long
-    - orderDate: Date
+    - orderDate: LocalDateTime
     + create(): void
 }
 
@@ -64,6 +81,8 @@ class ProductSales {
 
 ' 관계 정의
 User "1" --> "*" UserHistory
+User "*" --> "*" UserCoupon
+Coupon "*" --> "*" UserCoupon
 User "1" --> "*" Order
 Order "1" -- "*" OrderItem
 OrderItem "*" --> "1" Product
