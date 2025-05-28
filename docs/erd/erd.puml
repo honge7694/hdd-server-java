@@ -84,10 +84,10 @@ class OrderItem {
 class Product {
     - id: Long
     - name: String
+    - category: String
+    - brand: String
     - price: int
     - stockQuantity: int
-'    - totalSold: int
-'    + increaseSoldCount(quantity: int): void
 }
 
 ' 판매량을 조회를 위해 분리
@@ -97,6 +97,22 @@ class ProductSales {
     - totalSold: Long
     - lastSoldAt: LocalDateTime
     + increaseSales(quantity: int): void
+}
+
+' 개별 재고, 유통기한 관리
+class ProductItem {
+    - id: Long
+    - productId: Long
+    - isSold: Boolean
+    - expiryDate: LocalDateTime
+    - createdAt: LocalDateTime
+}
+
+' 개별 판매량 조회
+class ProductItemSales {
+    - id: Long
+    - productItemId: Long
+    - createdAt: LocalDateTime
 }
 
 class Cart {
@@ -123,6 +139,8 @@ Order "1" <-- "*" OrderItem
 OrderItem "*" --> "1" Product
 Order "1" <-- "*" OrderHistory
 Product "1" <-- "1" ProductSales
+Product "1" <-- "*" ProductItem
+ProductItem "1" <-- "*" ProductItemSales
 User "1" <-- "1" Cart
 Cart "1" <-- "*" CartItem
 Product "1" <-- "*" CartItem
