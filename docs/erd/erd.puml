@@ -80,13 +80,13 @@ class ProductSales {
 }
 
 ' 관계 정의
-User "1" --> "*" UserHistory
-User "*" --> "*" UserCoupon
-Coupon "*" --> "*" UserCoupon
-User "1" --> "*" Order
-Order "1" -- "*" OrderItem
+User "1" <-- "*" UserHistory
+User "1" <-- "*" UserCoupon
+Coupon "1" <-- "*" UserCoupon
+User "1" <-- "*" Order
+Order "1" <-- "*" OrderItem
 OrderItem "*" --> "1" Product
-Product "1" --> "1" ProductSales
+Product "1" <-- "1" ProductSales
 
 
 @enduml
