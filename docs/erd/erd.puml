@@ -99,22 +99,6 @@ class ProductSales {
     + increaseSales(quantity: int): void
 }
 
-' 개별 재고, 유통기한 관리
-class ProductItem {
-    - id: Long
-    - productId: Long
-    - isSold: Boolean
-    - expiryDate: LocalDateTime
-    - createdAt: LocalDateTime
-}
-
-' 개별 판매량 조회
-class ProductItemSales {
-    - id: Long
-    - productItemId: Long
-    - createdAt: LocalDateTime
-}
-
 class Cart {
     - id: Long
     - userId: Long
@@ -134,16 +118,16 @@ class CartItem {
 User "1" <-- "*" UserHistory
 User "1" <-- "*" UserCoupon
 Coupon "1" <-- "*" UserCoupon
+
 User "1" <-- "*" Order
 Order "1" <-- "*" OrderItem
 OrderItem "*" --> "1" Product
 Order "1" <-- "*" OrderHistory
+
 Product "1" <-- "1" ProductSales
-Product "1" <-- "*" ProductItem
-ProductItem "1" <-- "*" ProductItemSales
+
 User "1" <-- "1" Cart
 Cart "1" <-- "*" CartItem
 Product "1" <-- "*" CartItem
-
 
 @enduml
