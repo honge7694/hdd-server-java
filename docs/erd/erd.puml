@@ -1,5 +1,21 @@
 @startuml
 
+enum TransactionType {
+    - CHARGE
+    - USE
+}
+
+enum OrderStatus {
+    ORDERED,
+    PAID,
+    READY_FOR_SHIPMENT,
+    SHIPPING,
+    DELIVERED,
+    CANCELED,
+    RETURN_REQUESTED,
+    REFUNDED
+}
+
 class User {
     - id: Long
     - name: String
@@ -23,11 +39,6 @@ class Address {
     - zipcode: String
 }
 
-enum TransactionType {
-    - CHARGE
-    - USE
-}
-
 class Coupon {
     - id: Long
     - code: String
@@ -48,8 +59,17 @@ class UserCoupon {
 class Order {
     - id: Long
     - userId: Long
+    - status: OrderStatus
     - createdAt: LocalDateTime
     + create(): void
+    + changeStatus(newStatus: OrderStatus): void
+}
+
+class OrderHistory {
+    - id: Long
+    - orderId: Long
+    - status: OrderStatus
+    - createdAt: LocalDateTime
 }
 
 class OrderItem {
@@ -101,6 +121,7 @@ Coupon "1" <-- "*" UserCoupon
 User "1" <-- "*" Order
 Order "1" <-- "*" OrderItem
 OrderItem "*" --> "1" Product
+Order "1" <-- "*" OrderHistory
 Product "1" <-- "1" ProductSales
 User "1" <-- "1" Cart
 Cart "1" <-- "*" CartItem
