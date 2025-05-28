@@ -59,10 +59,14 @@ class UserCoupon {
 class Order {
     - id: Long
     - userId: Long
+    - userCouponId: Long
     - status: OrderStatus
     - createdAt: LocalDateTime
     + create(): void
     + changeStatus(newStatus: OrderStatus): void
+    + applyCoupon(userCouponId: UserCoupon): void
+    + calculateTotal(items: List<OrderItem>): Long
+    + calculateDiscountedTotal(items: List<OrderItem>, coupon: Coupon): Long
 }
 
 class OrderHistory {
@@ -88,6 +92,7 @@ class Product {
     - brand: String
     - price: int
     - stockQuantity: int
+    + reduceStock(quantity: int)
 }
 
 ' 판매량을 조회를 위해 분리
