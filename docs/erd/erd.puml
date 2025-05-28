@@ -48,7 +48,7 @@ class UserCoupon {
 class Order {
     - id: Long
     - userId: Long
-    - orderDate: LocalDateTime
+    - createdAt: LocalDateTime
     + create(): void
 }
 
@@ -79,6 +79,21 @@ class ProductSales {
     + increaseSales(quantity: int): void
 }
 
+class Cart {
+    - id: Long
+    - userId: Long
+}
+
+class CartItem {
+    - id: Long
+    - cartId: Long
+    - productId: Long
+    - quantity: int
+    - price: int
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+}
+
 ' 관계 정의
 User "1" <-- "*" UserHistory
 User "1" <-- "*" UserCoupon
@@ -87,6 +102,9 @@ User "1" <-- "*" Order
 Order "1" <-- "*" OrderItem
 OrderItem "*" --> "1" Product
 Product "1" <-- "1" ProductSales
+User "1" <-- "1" Cart
+Cart "1" <-- "*" CartItem
+Product "1" <-- "*" CartItem
 
 
 @enduml
