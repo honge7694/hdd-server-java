@@ -1,0 +1,5 @@
+# .github/ISSUE_TEMPLATE/config.yml
+blank: "기본 템플릿"
+milestone_template: "마일스톤 템플릿"
+bug_report: "버그 리포트"
+feature_request: "기능 요청"
