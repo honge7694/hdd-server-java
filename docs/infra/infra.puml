@@ -2,6 +2,7 @@
 skinparam componentStyle rectangle
 
 actor User
+actor Developer
 
 cloud "AWS" {
 
@@ -21,12 +22,14 @@ cloud "AWS" {
         queue "Redis" as Redis
     }
 
-    node "[EC2] Jenkins Server" as Jenkins
-
-    node "[AWS] CodeDeploy" as CodeDeploy
-
     cloud "S3\n(정적 파일 + 배포 아티팩트)" as S3
+
+    node "[EC2] Jenkins Server" as Jenkins
+    node "[AWS] CodeDeploy" as CodeDeploy
 }
+
+' 요청 흐름 (Request Flow) 선 색상 설정
+skinparam arrowColor #A8E6A1
 
 User --> ELB : HTTP 요청
 ELB --> ec2Dashed
@@ -38,8 +41,12 @@ AppLayer --> DBRead : 데이터\n조회
 DBWrite <--> DBRead
 AppLayer -L-> S3 : 정적 파일 조회
 
-Jenkins --> S3 : 빌드 결과 업로드
-S3 -L-> CodeDeploy: 배포 트리거
-CodeDeploy --> AppLayer : EC2\n배포
+' 배포 흐름 (Deployment Flow) 선 색상 설정
+skinparam arrowColor #8AA7FF
+
+Developer --> Jenkins : ①\n배포
+Jenkins --> S3 : ②\n빌드 결과\n업로드
+S3 -L-> CodeDeploy: ③\n배포\n트리거
+CodeDeploy --> AppLayer : ④\nEC2\n배포
 
 @enduml
