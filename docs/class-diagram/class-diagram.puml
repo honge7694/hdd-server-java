@@ -119,4 +119,20 @@ class CartItem {
     - updatedAt: LocalDateTime
 }
 
+' 관계 정의
+User "1" <-- "*" UserHistory
+User "1" <-- "*" UserCoupon
+Coupon "1" <-- "*" UserCoupon
+
+User "1" <-- "*" Order
+Order "1" <-- "*" OrderItem
+OrderItem "*" --> "1" Product
+Order "1" <-- "*" OrderHistory
+
+Product "1" <-- "1" ProductSales
+
+User "1" <-- "1" Cart
+Cart "1" <-- "*" CartItem
+Product "1" <-- "*" CartItem
+
 @enduml
