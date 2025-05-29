@@ -9,8 +9,8 @@ cloud "AWS" {
     node "[ELB] Load Balancer" as ELB
 
     node "Auto Scaling Group" as AppLayer {
-        node "[EC2] Spring Boot App" as ec2
         node "[EC2] Spring Boot App ..." as ec2Dashed #line.dashed
+        node "[EC2] Spring Boot App ..." as ec2
     }
 
     node "Database Layer" {
