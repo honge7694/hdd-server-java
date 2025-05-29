@@ -1,138 +1,117 @@
 @startuml
-
-enum TransactionType {
-    - CHARGE
-    - USE
+entity User {
+    * id: BIGINT <<PK>>
+    --
+    name: VARCHAR
+    balance: INT
+    address_city: VARCHAR
+    address_street: VARCHAR
+    address_zipcode: VARCHAR
 }
 
-enum OrderStatus {
-    ORDERED,
-    PAID,
-    READY_FOR_SHIPMENT,
-    SHIPPING,
-    DELIVERED,
-    CANCELED,
-    RETURN_REQUESTED,
-    REFUNDED
+entity UserHistory {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    amount: INT
+    transaction_type: ENUM(TransactionType)
+    create_date: DATETIME
 }
 
-class User {
-    - id: Long
-    - name: String
-    - address: Address
-    - balance: int
-    + chargeBalance(amount: int): void
-    + deductBalance(amount: int): void
+entity Coupon {
+    * id: BIGINT <<PK>>
+    --
+    code: VARCHAR
+    discount_amount: INT
+    issued_at: DATETIME
+    expired_at: DATETIME
+    quantity: INT
 }
 
-class UserHistory {
-    - id: Long
-    - userId: Long
-    - amount: int
-    - transactionType: TransactionType
-    - createDate: LocalDateTime
+entity UserCoupon {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    coupon_id: BIGINT <<FK>>
+    used: BOOLEAN
+    used_at: DATETIME
 }
 
-class Address {
-    - city: String
-    - street: String
-    - zipcode: String
+entity Order {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    user_coupon_id: BIGINT <<FK>>
+    status: ENUM(OrderStatus)
+    created_at: DATETIME
 }
 
-class Coupon {
-    - id: Long
-    - code: String
-    - discountAmount: int
-    - issuedAt: LocalDateTime
-    - expiredAt: LocalDateTime
-    - quantity: int
+entity OrderItem {
+    * id: BIGINT <<PK>>
+    --
+    order_id: BIGINT <<FK>>
+    product_id: BIGINT <<FK>>
+    price: BIGINT
+    quantity: BIGINT
 }
 
-class UserCoupon {
-    - id: Long
-    - userId: Long
-    - couponId: Long
-    - used: Boolean
-    - usedAt: LocalDateTime
+entity OrderHistory {
+    * id: BIGINT <<PK>>
+    --
+    order_id: BIGINT <<FK>>
+    status: ENUM(OrderStatus)
+    created_at: DATETIME
 }
 
-class Order {
-    - id: Long
-    - userId: Long
-    - userCouponId: Long
-    - status: OrderStatus
-    - createdAt: LocalDateTime
-    + create(): void
-    + changeStatus(newStatus: OrderStatus): void
-    + applyCoupon(userCouponId: UserCoupon): void
-    + calculateTotal(items: List<OrderItem>): Long
-    + calculateDiscountedTotal(items: List<OrderItem>, coupon: Coupon): Long
+entity Product {
+    * id: BIGINT <<PK>>
+    --
+    name: VARCHAR
+    category: VARCHAR
+    brand: VARCHAR
+    price: INT
+    stock_quantity: INT
 }
 
-class OrderHistory {
-    - id: Long
-    - orderId: Long
-    - status: OrderStatus
-    - createdAt: LocalDateTime
+entity ProductSales {
+    * id: BIGINT <<PK>>
+    --
+    product_id: BIGINT <<FK>>
+    total_sold: BIGINT
+    last_sold_at: DATETIME
 }
 
-class OrderItem {
-    - id: Long
-    - orderId: Long
-    - productId: Long
-    - price: Long
-    - quantity: Long
-    + totalPrice(): Long
+entity Cart {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
 }
 
-class Product {
-    - id: Long
-    - name: String
-    - category: String
-    - brand: String
-    - price: int
-    - stockQuantity: int
-    + reduceStock(quantity: int)
+entity CartItem {
+    * id: BIGINT <<PK>>
+    --
+    cart_id: BIGINT <<FK>>
+    product_id: BIGINT <<FK>>
+    quantity: INT
+    price: INT
+    created_at: DATETIME
+    updated_at: DATETIME
 }
 
-' 판매량을 조회를 위해 분리
-class ProductSales {
-    - id: Long
-    - productId: Long
-    - totalSold: Long
-    - lastSoldAt: LocalDateTime
-    + increaseSales(quantity: int): void
-}
+' 관계선
+User ||--o{ UserHistory
+User ||--o{ UserCoupon
+Coupon ||--o{ UserCoupon
 
-class Cart {
-    - id: Long
-    - userId: Long
-}
+User ||--o{ Order
+Order ||--o{ OrderItem
+OrderItem }o--|| Product
+Order ||--o{ OrderHistory
 
-class CartItem {
-    - id: Long
-    - cartId: Long
-    - productId: Long
-    - quantity: int
-    - price: int
-    - createdAt: LocalDateTime
-    - updatedAt: LocalDateTime
-}
+Product ||--|| ProductSales
 
-' 관계 정의
-User "1" <-- "*" UserHistory
-User "1" <-- "*" UserCoupon
-Coupon "1" <-- "*" UserCoupon
-
-User "1" <-- "*" Order
-Order "1" <-- "*" OrderItem
-OrderItem "*" --> "1" Product
-Order "1" <-- "*" OrderHistory
-
-Product "1" <-- "1" ProductSales
-
-User "1" <-- "1" Cart
-Cart "1" <-- "*" CartItem
-Product "1" <-- "*" CartItem
+User ||--|| Cart
+Cart ||--o{ CartItem
+Product ||--o{ CartItem
 
 @enduml
