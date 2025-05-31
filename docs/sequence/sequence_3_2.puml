@@ -1,0 +1,46 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "Coupon Controller" as cc
+participant "Coupon Service" as cs
+participant "Coupon Repository" as cr
+participant "Coupon" as c
+
+
+group Step 1. 선착순 쿠폰 발급 요청
+    autonumber 1 "(0)"
+    sc -> cc : POST /coupons/{couponId}
+    cc -> cs : issueCoupon(couponId)
+end
+
+group Step 2. 쿠폰 조회
+    cs -> cr : getCoupon(couponId)
+    cr --> cs : Coupon: Coupon
+end
+
+group Step 3. 쿠폰 개수 차감
+    cs -> c : decrementCouponStock()
+    c --> cs : 개수 차감
+end
+
+group Step 4. 쿠폰 발급 저장
+    cs -> cr : issueCoupon(couponId)
+    cr --> cs : Coupon: Coupon
+end
+
+group Step 5. 응답 반환
+    cs -> cs : map to couponResponseDto
+    cs --> cc : couponResponseDto
+    cc --> sc : HTTP 200 OK, couponResponseDto
+end
+
+alt Step 2. 재고 없을 경우
+    cs --> cc : throw CouponOutOfStockException
+    cc --> sc : HTTP 400 Bad Request, "쿠폰 소진"
+end
+
+
+@enduml

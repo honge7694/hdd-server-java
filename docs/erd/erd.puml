@@ -1,0 +1,117 @@
+@startuml
+entity User {
+    * id: BIGINT <<PK>>
+    --
+    name: VARCHAR
+    balance: INT
+    address_city: VARCHAR
+    address_street: VARCHAR
+    address_zipcode: VARCHAR
+}
+
+entity UserHistory {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    amount: INT
+    transaction_type: ENUM(TransactionType)
+    create_date: DATETIME
+}
+
+entity Coupon {
+    * id: BIGINT <<PK>>
+    --
+    code: VARCHAR
+    discount_amount: INT
+    issued_at: DATETIME
+    expired_at: DATETIME
+    quantity: INT
+}
+
+entity UserCoupon {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    coupon_id: BIGINT <<FK>>
+    used: BOOLEAN
+    used_at: DATETIME
+}
+
+entity Order {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+    user_coupon_id: BIGINT <<FK>>
+    status: ENUM(OrderStatus)
+    created_at: DATETIME
+}
+
+entity OrderItem {
+    * id: BIGINT <<PK>>
+    --
+    order_id: BIGINT <<FK>>
+    product_id: BIGINT <<FK>>
+    price: BIGINT
+    quantity: BIGINT
+}
+
+entity OrderHistory {
+    * id: BIGINT <<PK>>
+    --
+    order_id: BIGINT <<FK>>
+    status: ENUM(OrderStatus)
+    created_at: DATETIME
+}
+
+entity Product {
+    * id: BIGINT <<PK>>
+    --
+    name: VARCHAR
+    category: VARCHAR
+    brand: VARCHAR
+    price: INT
+    stock_quantity: INT
+}
+
+entity ProductSales {
+    * id: BIGINT <<PK>>
+    --
+    product_id: BIGINT <<FK>>
+    total_sold: BIGINT
+    last_sold_at: DATETIME
+}
+
+entity Cart {
+    * id: BIGINT <<PK>>
+    --
+    user_id: BIGINT <<FK>>
+}
+
+entity CartItem {
+    * id: BIGINT <<PK>>
+    --
+    cart_id: BIGINT <<FK>>
+    product_id: BIGINT <<FK>>
+    quantity: INT
+    price: INT
+    created_at: DATETIME
+    updated_at: DATETIME
+}
+
+' 관계선
+User ||--o{ UserHistory
+User ||--o{ UserCoupon
+Coupon ||--o{ UserCoupon
+
+User ||--o{ Order
+Order ||--o{ OrderItem
+OrderItem }o--|| Product
+Order ||--o{ OrderHistory
+
+Product ||--|| ProductSales
+
+User ||--|| Cart
+Cart ||--o{ CartItem
+Product ||--o{ CartItem
+
+@enduml

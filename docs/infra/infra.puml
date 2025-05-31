@@ -1,0 +1,52 @@
+@startuml
+skinparam componentStyle rectangle
+
+actor User
+actor Developer
+
+package "AWS" {
+
+    node "[ELB] Load Balancer" as ELB
+
+    node "Auto Scaling Group" as AppLayer {
+        node "[EC2] Spring Boot App ..." as ec2Dashed #line.dashed
+        node "[EC2] Spring Boot App ..." as ec2
+    }
+
+    node "Database Layer" {
+        database "DB (Write)" as DBWrite
+        database "DB (Read)" as DBRead
+    }
+
+    node "Cache Layer" {
+        queue "Redis" as Redis
+    }
+
+    cloud "S3\n(정적 파일 + 배포 아티팩트)" as S3
+
+    node "[EC2] Jenkins Server" as Jenkins
+    node "[AWS] CodeDeploy" as CodeDeploy
+}
+
+' 요청 흐름 (Request Flow) 선 색상 설정
+skinparam arrowColor #A8E6A1
+
+User --> ELB : HTTP 요청
+ELB --> ec2Dashed
+ELB --> ec2  : 트래픽 분산\n(로드 밸런싱)
+
+AppLayer --> Redis : 캐시\n요청/저장
+AppLayer --> DBWrite : 데이터\n쓰기
+AppLayer --> DBRead : 데이터\n조회
+DBWrite <--> DBRead
+AppLayer -L-> S3 : 정적 파일 조회
+
+' 배포 흐름 (Deployment Flow) 선 색상 설정
+skinparam arrowColor #8AA7FF
+
+Developer --> Jenkins : ①\n배포
+Jenkins --> S3 : ②\n빌드 결과\n업로드
+S3 -L-> CodeDeploy: ③\n배포\n트리거
+CodeDeploy --> AppLayer : ④\nEC2\n배포
+
+@enduml

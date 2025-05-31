@@ -1,0 +1,28 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "Coupon Controller" as cc
+participant "Coupon Service" as cs
+participant "Coupon Repository" as cr
+
+group Step 1. 쿠폰 목록 조회 요청
+    autonumber 1 "(0)"
+    sc -> cc : GET /coupons/{userId}
+    cc -> cs : getCoupons(userId)
+end
+
+group Step 2. 쿠폰 조회
+    cs -> cr : getCoupons(userId)
+    cr --> cs : Coupon: Coupon
+end
+
+group Step 3. 응답 반환
+    cs -> cs : map to couponResponseDto
+    cs --> cc : couponResponseDto
+    cc --> sc : HTTP 200 OK, couponResponseDto
+end
+
+@enduml

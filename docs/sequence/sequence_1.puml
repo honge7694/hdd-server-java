@@ -1,0 +1,29 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "User Controller" as uc
+participant "User Service" as us
+participant "User Repository" as ur
+
+
+group Step 1. 잔액 조회 요청
+    autonumber 1 "(0)"
+    sc -> uc : GET /users/point/{userId}
+    uc -> us : getUserBalance(userId)
+end
+
+group Step 2. 사용자 조회
+    us -> ur : getUser(userId)
+    ur --> us : user: User
+end
+
+group Step 3. 응답 반환
+    us -> us : map to userResponseDto
+    us --> uc : userResponseDto
+    uc --> sc : HTTP 200 OK, userResponseDto
+end
+
+@enduml

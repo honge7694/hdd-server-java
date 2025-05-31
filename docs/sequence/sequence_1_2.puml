@@ -1,0 +1,39 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "User Controller" as uc
+participant "User Service" as us
+participant "User Repository" as ur
+participant "User" as u
+
+group Step 1. 잔액 충전 요청
+    autonumber 1 "(0)"
+    sc -> uc : POST /users/point/{userId}
+    uc -> us : chargeUserBalance(userId, 충전금액)
+end
+
+group Step 2. 사용자 조회
+    us -> ur : findById(userId)
+    ur --> us : user: User
+end
+
+group Step 3. 잔액 충전
+    us -> u : addBalance(충전금액)
+    u --> us : 충전 완료
+end
+
+group Step 4. 사용자 저장
+    us -> ur : save(user)
+    ur --> us : 저장 완료
+end
+
+group Step 5. 응답 반환
+    us -> us : map to UserResponseDto
+    us --> uc : UserResponseDto
+    uc --> sc : HTTP 200 OK, UserResponseDto
+end
+
+@enduml

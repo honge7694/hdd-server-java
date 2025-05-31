@@ -1,0 +1,28 @@
+@startuml
+
+hide footbox
+autoactivate on
+
+participant "Service Client" as sc
+participant "Product Controller" as pc
+participant "Product Service" as ps
+participant "Product Repository" as pr
+
+group Step 1. 상위 상품 조회 요청
+    autonumber 1 "(0)"
+    sc -> pc : GET /products/best
+    pc -> ps : getBestProducts()
+end
+
+group Step 2. 상품 조회
+    ps -> pr : getBestProducts()
+    pr --> ps : product : List<Product>
+end
+
+group Step 3. 응답 반환
+    ps -> ps :  map List<Product> to List<bestProductResponseDto>
+    ps --> pc : List<bestProductResponseDto>
+    pc --> sc : HTTP 200 OK, List<bestProductResponseDto>
+end
+
+@enduml

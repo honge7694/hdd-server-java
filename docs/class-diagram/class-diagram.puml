@@ -1,0 +1,138 @@
+@startuml
+
+enum TransactionType {
+    - CHARGE
+    - USE
+}
+
+enum OrderStatus {
+    ORDERED,
+    PAID,
+    READY_FOR_SHIPMENT,
+    SHIPPING,
+    DELIVERED,
+    CANCELED,
+    RETURN_REQUESTED,
+    REFUNDED
+}
+
+class User {
+    - id: Long
+    - name: String
+    - address: Address
+    - balance: int
+    + chargeBalance(amount: int): void
+    + deductBalance(amount: int): void
+}
+
+class UserHistory {
+    - id: Long
+    - userId: Long
+    - amount: int
+    - transactionType: TransactionType
+    - createDate: LocalDateTime
+}
+
+class Address {
+    - city: String
+    - street: String
+    - zipcode: String
+}
+
+class Coupon {
+    - id: Long
+    - code: String
+    - discountAmount: int
+    - issuedAt: LocalDateTime
+    - expiredAt: LocalDateTime
+    - quantity: int
+}
+
+class UserCoupon {
+    - id: Long
+    - userId: Long
+    - couponId: Long
+    - used: Boolean
+    - usedAt: LocalDateTime
+}
+
+class Order {
+    - id: Long
+    - userId: Long
+    - userCouponId: Long
+    - status: OrderStatus
+    - createdAt: LocalDateTime
+    + create(): void
+    + changeStatus(newStatus: OrderStatus): void
+    + applyCoupon(userCouponId: UserCoupon): void
+    + calculateTotal(items: List<OrderItem>): Long
+    + calculateDiscountedTotal(items: List<OrderItem>, coupon: Coupon): Long
+}
+
+class OrderHistory {
+    - id: Long
+    - orderId: Long
+    - status: OrderStatus
+    - createdAt: LocalDateTime
+}
+
+class OrderItem {
+    - id: Long
+    - orderId: Long
+    - productId: Long
+    - price: Long
+    - quantity: Long
+    + totalPrice(): Long
+}
+
+class Product {
+    - id: Long
+    - name: String
+    - category: String
+    - brand: String
+    - price: int
+    - stockQuantity: int
+    + reduceStock(quantity: int)
+}
+
+' 판매량을 조회를 위해 분리
+class ProductSales {
+    - id: Long
+    - productId: Long
+    - totalSold: Long
+    - lastSoldAt: LocalDateTime
+    + increaseSales(quantity: int): void
+}
+
+class Cart {
+    - id: Long
+    - userId: Long
+}
+
+class CartItem {
+    - id: Long
+    - cartId: Long
+    - productId: Long
+    - quantity: int
+    - price: int
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+}
+
+' 관계 정의
+User "1" <-- "*" UserHistory
+User "1" <-- "*" UserCoupon
+Coupon "1" <-- "*" UserCoupon
+
+User "1" <-- "*" Order
+Order "1" <-- "*" OrderItem
+OrderItem "*" --> "1" Product
+Order "1" <-- "*" OrderHistory
+
+Product "1" <-- "1" ProductSales
+
+User "1" <-- "1" Cart
+Cart "1" <-- "*" CartItem
+Product "1" <-- "*" CartItem
+
+@enduml
