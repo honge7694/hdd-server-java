@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.global.response;
 
+import lombok.Getter;
+
+@Getter
 public class ApiResponse<T> {
     private int status;
     private String message;
