@@ -11,8 +11,8 @@ import kr.hhplus.be.server.user.usecase.out.RegisterUserOutput;
 import kr.hhplus.be.server.user.usecase.out.RegisterUserResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -24,8 +24,6 @@ public class UserController implements UserDocs, RegisterUserOutput {
 
     @Override
     public ResponseEntity<ApiResponse<UserResponseDto>> registerUser(@RequestBody UserRequestDto requestDto) {
-        System.out.println("requestDto = " + requestDto.getName() + requestDto.getEmail());
-        System.out.println("requestDto.getAddress() = " + requestDto.getAddress());
         RegisterUserCommand command = new RegisterUserCommand(
                 requestDto.getName(),
                 requestDto.getEmail(),

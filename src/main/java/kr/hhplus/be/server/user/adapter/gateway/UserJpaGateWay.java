@@ -6,6 +6,8 @@ import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class UserJpaGateWay implements UserRepository {
@@ -17,6 +19,11 @@ public class UserJpaGateWay implements UserRepository {
         UserEntity entity = UserEntity.fromDomain(user);
         UserEntity saved = userJpaRepo.save(entity);
         return saved.toDomain();
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userJpaRepo.findByEmail(email).map(UserEntity::toDomain);
     }
 
 }

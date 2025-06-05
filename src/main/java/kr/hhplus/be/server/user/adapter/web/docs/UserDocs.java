@@ -38,9 +38,17 @@ public interface UserDocs {
                             }
                         }
                     }
-                """)
-                    )
-            )
+                """))),
+            @ApiResponse(responseCode = "409", description = "이미 사용 중인 이메일입니다.",
+                    content = @Content(
+                            schema = @Schema(implementation = ApiResponse.class,
+                            example = """
+                                {
+                                    "status": 409,
+                                    "message": "이미 사용 중인 이메일입니다.",
+                                    "data": null
+                                }
+                        """))),
     })
     @PostMapping("/v1/register")
     ResponseEntity<kr.hhplus.be.server.global.response.ApiResponse<UserResponseDto>> registerUser(

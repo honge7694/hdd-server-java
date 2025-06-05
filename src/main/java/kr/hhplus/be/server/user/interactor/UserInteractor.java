@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.user.interactor;
 
+import kr.hhplus.be.server.global.exception.ConflictException;
 import kr.hhplus.be.server.user.adapter.gateway.UserRepository;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.usecase.in.RegisterUserCommand;
@@ -19,6 +20,9 @@ public class UserInteractor implements RegisterUserInput {
 
     @Override
     public void registerUser(RegisterUserCommand command, RegisterUserOutput presenter) {
+        if (userRepository.findByEmail(command.email()).isPresent()) {
+            throw new ConflictException("이미 사용 중인 이메일입니다.");
+        }
         User user = User.create(command.name(), command.email(), command.password(), command.address());
         User saved = userRepository.save(user);
         presenter.ok(new RegisterUserResult(
