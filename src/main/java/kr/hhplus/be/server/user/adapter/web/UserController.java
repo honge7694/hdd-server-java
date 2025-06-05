@@ -3,8 +3,10 @@ package kr.hhplus.be.server.user.adapter.web;
 import kr.hhplus.be.server.global.response.ApiResponse;
 import kr.hhplus.be.server.user.adapter.web.docs.UserDocs;
 import kr.hhplus.be.server.user.adapter.web.dto.AddressResponseDto;
+import kr.hhplus.be.server.user.adapter.web.dto.UserChargeBalanceRequestDto;
 import kr.hhplus.be.server.user.adapter.web.dto.UserRequestDto;
 import kr.hhplus.be.server.user.adapter.web.dto.UserResponseDto;
+import kr.hhplus.be.server.user.usecase.in.ChargeUserBalanceCommand;
 import kr.hhplus.be.server.user.usecase.in.RegisterUserCommand;
 import kr.hhplus.be.server.user.usecase.in.RegisterUserInput;
 import kr.hhplus.be.server.user.usecase.out.RegisterUserOutput;
@@ -36,6 +38,16 @@ public class UserController implements UserDocs, RegisterUserOutput {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @Override
+    public ResponseEntity<ApiResponse<UserResponseDto>> chargeUserBalance(@RequestBody UserChargeBalanceRequestDto requestDto) {
+        ChargeUserBalanceCommand command = new ChargeUserBalanceCommand(
+                requestDto.getUserId(),
+                requestDto.getAmount()
+        );
+        registerUserInput.chargeUserBalance(command, this);
+        return ResponseEntity.ok(ApiResponse.success(lastResponse));
+    }
+
     /* Presenter 역할 */
     @Override
     public void ok(RegisterUserResult registerUserResult) {
@@ -43,6 +55,7 @@ public class UserController implements UserDocs, RegisterUserOutput {
                 registerUserResult.id(),
                 registerUserResult.name(),
                 registerUserResult.email(),
+                registerUserResult.balance(),
                 AddressResponseDto.from(registerUserResult.address())
         );
     }

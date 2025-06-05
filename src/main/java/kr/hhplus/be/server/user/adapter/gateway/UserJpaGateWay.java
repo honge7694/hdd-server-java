@@ -26,4 +26,16 @@ public class UserJpaGateWay implements UserRepository {
         return userJpaRepo.findByEmail(email).map(UserEntity::toDomain);
     }
 
+    @Override
+    public Optional<User> findById(Long userId) {
+        Optional<User> entity = userJpaRepo.findById(userId).map(UserEntity::toDomain);
+        return entity;
+    }
+
+    @Override
+    public User update(User user) {
+        UserEntity entity = UserEntity.applyDomain(user);
+        return userJpaRepo.save(entity).toDomain();
+    }
+
 }

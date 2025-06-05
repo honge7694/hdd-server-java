@@ -34,6 +34,15 @@ public class UserEntity {
         this.balance = balance;
     }
 
+    public UserEntity(long id, String name, String email, String password, Address address, int balance) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.address = address;
+        this.balance = balance;
+    }
+
     public static UserEntity fromDomain(User user) {
         return new UserEntity(
                 user.getName(),
@@ -46,5 +55,17 @@ public class UserEntity {
 
     public User toDomain() {
         return User.create(name, email, password, address).assignId(id);
+    }
+
+    // entity 수정 메서드
+    public static UserEntity applyDomain(User user) {
+        return new UserEntity(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getAddress(),
+                user.getBalance()
+        );
     }
 }

@@ -6,5 +6,6 @@ public record RegisterUserResult(
         Long id,
         String name,
         String email,
+        int balance,
         Address address
 ) {}
