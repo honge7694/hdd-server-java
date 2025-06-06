@@ -1,11 +1,11 @@
-package kr.hhplus.be.server.user.usecase.out;
+package kr.hhplus.be.server.user.usecase.in;
 
 import kr.hhplus.be.server.user.domain.Address;
 
-public record RegisterUserResult(
-        Long id,
+public record UserRegisterCommand(
         String name,
         String email,
-        int balance,
+        String password,
         Address address
 ) {}
+
