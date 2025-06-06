@@ -10,6 +10,7 @@ public class User {
     private final Address address;
     private int balance;
 
+    // 생성
     public User(String name, String email, String password, Address address) {
         this.name = name;
         this.email = email;
@@ -20,6 +21,19 @@ public class User {
 
     public static User create(String name, String email, String password, Address address) {
         return new User(name, email, password, address);
+    }
+
+    // entity -> domain
+    public static User create(String name, String email, String password, Address address, int balance) {
+        return new User(name, email, password, address, balance);
+    }
+
+    public User(String name, String email, String password, Address address, int balance) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.address = address;
+        this.balance = balance;
     }
 
     /* 비즈니스 로직 */
@@ -58,7 +72,7 @@ public class User {
     }
 
     public User assignId(Long id) {
-        User userWithId = new User(this.name, this.email, this.password, this.address);
+        User userWithId = new User(this.name, this.email, this.password, this.address, this.balance);
         userWithId.id = id;
         return userWithId;
     }

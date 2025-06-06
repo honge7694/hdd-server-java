@@ -54,7 +54,7 @@ public class UserEntity {
     }
 
     public User toDomain() {
-        return User.create(name, email, password, address).assignId(id);
+        return User.create(name, email, password, address, balance).assignId(id);
     }
 
     // entity 수정 메서드

@@ -28,8 +28,8 @@ public class UserJpaGateWay implements UserRepository {
 
     @Override
     public Optional<User> findById(Long userId) {
-        Optional<User> entity = userJpaRepo.findById(userId).map(UserEntity::toDomain);
-        return entity;
+        Optional<User> user = userJpaRepo.findById(userId).map(UserEntity::toDomain);
+        return user;
     }
 
     @Override

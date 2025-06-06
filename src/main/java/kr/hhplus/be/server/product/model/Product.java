@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.global.exception.ConflictException;
 import lombok.Getter;
 
+import java.sql.SQLOutput;
+
 @Entity
 @Getter
 public class Product {
@@ -29,10 +31,10 @@ public class Product {
     }
 
     public void reduceStock(int quantity) {
-        int restStock = this.stockQuantity - quantity;
+        int restStock = stockQuantity - quantity;
         if (restStock < 0) {
             throw new ConflictException("상품의 개수가 부족합니다.");
         }
-        this.stockQuantity -= restStock;
+        stockQuantity = restStock;
     }
 }
