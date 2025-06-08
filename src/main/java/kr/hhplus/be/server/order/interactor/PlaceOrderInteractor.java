@@ -12,7 +12,7 @@ import kr.hhplus.be.server.order.usecase.in.PlaceOrderInput;
 import kr.hhplus.be.server.order.usecase.out.PlaceOrderOutput;
 import kr.hhplus.be.server.product.model.Product;
 import kr.hhplus.be.server.product.repository.ProductRepository;
-import kr.hhplus.be.server.user.adapter.gateway.UserRepository;
+import kr.hhplus.be.server.user.application.usecase.port.out.UserRepository;
 import kr.hhplus.be.server.user.domain.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
