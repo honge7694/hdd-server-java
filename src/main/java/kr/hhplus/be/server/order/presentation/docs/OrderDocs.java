@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.order.presentation.docs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -86,5 +87,5 @@ public interface OrderDocs {
     @PostMapping("/v1/orderplace")
     ResponseEntity<kr.hhplus.be.server.global.response.ApiResponse<OrderResponseDto>> placeOrder(
             @RequestBody OrderRequestDto orderRequestDto
-    );
+    ) throws JsonProcessingException;
 }

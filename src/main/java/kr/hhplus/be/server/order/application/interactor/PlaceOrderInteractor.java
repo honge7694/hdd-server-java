@@ -1,10 +1,13 @@
 package kr.hhplus.be.server.order.application.interactor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.global.exception.NotFoundException;
+import kr.hhplus.be.server.order.application.usecase.port.out.OrderMessageRepository;
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderRepository;
-import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.domain.OrderHistory;
-import kr.hhplus.be.server.order.domain.OrderItem;
+import kr.hhplus.be.server.order.application.usecase.port.result.PlaceOrderResult;
+import kr.hhplus.be.server.order.application.usecase.port.result.dto.ProductItem;
+import kr.hhplus.be.server.order.domain.*;
 import kr.hhplus.be.server.order.domain.enums.OrderStatus;
 import kr.hhplus.be.server.order.application.usecase.command.ProductItemCommand;
 import kr.hhplus.be.server.order.application.usecase.command.PlaceOrderCommand;
@@ -18,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaceOrderInteractor implements PlaceOrderInput {
@@ -25,26 +31,33 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderMessageRepository orderMessageRepository;
+    private final ObjectMapper objectMapper;
 
-    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMessageRepository orderMessageRepository, ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.orderMessageRepository = orderMessageRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     @Transactional
-    public void orderItemCommand(PlaceOrderCommand placeOrderCommand, PlaceOrderOutput placeOrderOutput) {
+    public void orderItemCommand(PlaceOrderCommand placeOrderCommand, PlaceOrderOutput present) throws JsonProcessingException {
         User user = userRepository.findById(placeOrderCommand.userId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
 
         // Order 생성
         Long todoCouponId = 0L;
         Order order = Order.create(user.getId(), todoCouponId, OrderStatus.ORDERED, LocalDateTime.now(), LocalDateTime.now());
-        Order savedOrder = orderRepository.save(order);
+        //Order savedOrder = orderRepository.save(order);
+        // 메시징(Outbox)
+        Order savedOrder = outBoxMessaging(order, placeOrderCommand.items());
 
         // OrderItem 생성
         int totalPrice = 0;
+        List<Product> productItems = new ArrayList<>();
         for(ProductItemCommand productItemCommand : placeOrderCommand.items()) {
             Long productId = productItemCommand.productId();
             Product product = productRepository.findById(productId)
@@ -52,6 +65,8 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
             product.reduceStock(productItemCommand.quantity());
             totalPrice += product.getPrice() * productItemCommand.quantity();
             productRepository.save(product);
+
+            productItems.add(product);
 
             OrderItem orderItem = OrderItem.create(savedOrder.getId(), productId, product.getPrice(), productItemCommand.quantity());
             orderRepository.save(orderItem);
@@ -64,5 +79,35 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         // OrderHistory 생성
         OrderHistory orderHistory = OrderHistory.create(savedOrder.getId(), OrderStatus.ORDERED, LocalDateTime.now());
         orderRepository.save(orderHistory);
+
+        present.ok(
+                new PlaceOrderResult(
+                        savedOrder.getId(),
+                        user.getId(),
+                        OrderStatus.ORDERED,
+                        productItems.stream().map(product -> {
+                            int quantity = placeOrderCommand.items().stream()
+                                    .filter(cmd -> cmd.productId().equals(product.getId()))
+                                    .findFirst()
+                                    .map(ProductItemCommand::quantity)
+                                    .orElse(0);
+
+                            return new ProductItem(
+                                    product.getId(),
+                                    product.getName(),
+                                    product.getPrice(),
+                                    quantity
+                            );
+                        }).collect(Collectors.toList()),
+                        totalPrice,
+                        savedOrder.getCreatedAt()
+                ));
+    }
+
+    private Order outBoxMessaging(Order order, List<ProductItemCommand> productItems) throws JsonProcessingException {
+        OrderCreatePayload payload = OrderCreatePayload.create(order.getUserId(), order.getUserCouponId(), productItems);
+        String jsonPayload = objectMapper.writeValueAsString(payload);
+        OutboxEvent event = new OutboxEvent("order_created", jsonPayload, OrderStatus.PAID);
+        return orderMessageRepository.save(order, event);
     }
 }

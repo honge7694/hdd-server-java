@@ -1,8 +1,8 @@
-package kr.hhplus.be.server.order.infra.gateway;
+package kr.hhplus.be.server.order.application.usecase.port.out;
 
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OutboxEvent;
 
-public interface OrderRepositoryCustom {
+public interface OrderMessageRepository {
     Order save(Order order, OutboxEvent event);
 }
