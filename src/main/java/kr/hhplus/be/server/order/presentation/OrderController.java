@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.order.presentation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import kr.hhplus.be.server.global.response.ApiResponse;
 import kr.hhplus.be.server.order.presentation.docs.OrderDocs;
 import kr.hhplus.be.server.order.presentation.dto.OrderRequestDto;
@@ -24,7 +25,7 @@ public class OrderController implements OrderDocs, PlaceOrderOutput {
     private OrderResponseDto lastResponse;
 
     @Override
-    public ResponseEntity<ApiResponse<OrderResponseDto>> placeOrder(@RequestBody OrderRequestDto orderRequestDto) {
+    public ResponseEntity<ApiResponse<OrderResponseDto>> placeOrder(@RequestBody OrderRequestDto orderRequestDto) throws JsonProcessingException {
         PlaceOrderCommand command = new PlaceOrderCommand(
                 orderRequestDto.getUserId(),
                 orderRequestDto.getUserCouponId(),
@@ -42,7 +43,10 @@ public class OrderController implements OrderDocs, PlaceOrderOutput {
     public void ok(PlaceOrderResult placeOrderResult) {
         lastResponse = new OrderResponseDto(
             placeOrderResult.id(),
+            placeOrderResult.userId(),
             placeOrderResult.status(),
+            placeOrderResult.productList(),
+            placeOrderResult.totalPrice(),
             placeOrderResult.createdAt()
         );
     }
