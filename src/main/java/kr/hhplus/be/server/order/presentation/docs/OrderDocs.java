@@ -34,12 +34,19 @@ public interface OrderDocs {
                         "status": 200,
                         "message": "success",
                         "data": {
-                            "userId": 1,
-                            "userCouponId": 1,
-                            "orderItems": {
-                                "productId": 1,
-                                "quantity": 1,
-                            }
+                            "orderId": 652,
+                            "userId": 202,
+                            "orderStatus": "ORDERED",
+                            "productItemList": [
+                                {
+                                    "id": 1,
+                                    "name": "아이폰 15",
+                                    "price": 1350000,
+                                    "quantity": 1
+                                }
+                            ],
+                            "totalPrice": 1350000,
+                            "orderDate": "2025-06-12T01:23:34.8630729"
                         }
                     }
                 """))),

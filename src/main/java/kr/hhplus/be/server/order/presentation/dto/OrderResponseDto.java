@@ -19,6 +19,6 @@ public class OrderResponseDto {
     private Long userId;
     private OrderStatus orderStatus;
     private List<ProductItem> productItemList;
-    private int toalPrice;
+    private int totalPrice;
     private LocalDateTime orderDate;
 }
