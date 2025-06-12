@@ -1,25 +1,27 @@
 package kr.hhplus.be.server.order.infra.gateway;
 
+import kr.hhplus.be.server.order.application.usecase.port.out.OrderIdempotencyRepository;
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderMessageRepository;
-import kr.hhplus.be.server.order.domain.OutboxEvent;
+import kr.hhplus.be.server.order.domain.*;
 import kr.hhplus.be.server.order.infra.gateway.custom.OrderRepositoryCustom;
 import kr.hhplus.be.server.order.infra.gateway.custom.OutboxRepositoryCustom;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderEntity;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderHistoryEntity;
+import kr.hhplus.be.server.order.infra.gateway.entity.OrderIdempotencyEntity;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderItemEntity;
-import kr.hhplus.be.server.order.domain.Order;
-import kr.hhplus.be.server.order.domain.OrderHistory;
-import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderRepository;
 import kr.hhplus.be.server.order.infra.gateway.jpa.OrderHistoryJpaRepository;
+import kr.hhplus.be.server.order.infra.gateway.jpa.OrderIdempotencyJpaRepository;
 import kr.hhplus.be.server.order.infra.gateway.jpa.OrderItemJpaRepository;
 import kr.hhplus.be.server.order.infra.gateway.jpa.OrderJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
-public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository {
+public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository, OrderIdempotencyRepository {
 
     private final OrderJpaRepository orderJpaRepository;
     private final OrderItemJpaRepository orderItemJpaRepository;
@@ -27,6 +29,7 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository 
 //    @Qualifier("orderRepositoryCustomImpl")
     private final OrderRepositoryCustom orderRepositoryCustom;
     private final OutboxRepositoryCustom outboxRepositoryCustom;
+    private final OrderIdempotencyJpaRepository orderIdempotencyJpaRepository;
 
     @Override
     public Order save(Order order) {
@@ -58,4 +61,18 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository 
     public OutboxEvent findByOrderId(Long orderId) {
         return outboxRepositoryCustom.findByOrderId(orderId);
     }
+
+    @Override
+    public OrderIdempotency save(OrderIdempotency orderIdempotency) {
+        OrderIdempotencyEntity orderIdempotencyEntity = OrderIdempotencyEntity.fromDomain(orderIdempotency);
+        OrderIdempotencyEntity savedOrderIdempotencyEntity = orderIdempotencyJpaRepository.save(orderIdempotencyEntity);
+        return savedOrderIdempotencyEntity.toDomain();
+    }
+
+    @Override
+    public Optional<OrderIdempotency> findByIdempotencyKey(String idempotencyKey) {
+        return orderIdempotencyJpaRepository.findByIdempotencyKey(idempotencyKey);
+    }
+
+
 }
