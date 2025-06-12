@@ -20,7 +20,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         OrderEntity orderEntity = OrderEntity.fromDomain(order);
         em.persist(orderEntity);
         // 메시징 처리
-        OutboxEventEntity outboxEventEntity = OutboxEventEntity.fromDomain(event);
+        OutboxEventEntity outboxEventEntity = OutboxEventEntity.fromDomain(event, orderEntity.getId());
         em.persist(outboxEventEntity);
 
         em.flush();

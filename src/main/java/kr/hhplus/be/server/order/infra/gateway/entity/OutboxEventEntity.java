@@ -17,6 +17,8 @@ public class OutboxEventEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long orderId;
+
     private String type;
 
     @Lob
@@ -27,8 +29,9 @@ public class OutboxEventEntity {
     private LocalDateTime createdAt;
 
     // 도메인 -> 엔티티 변환 메서드
-    public static OutboxEventEntity fromDomain(OutboxEvent outboxEvent) {
+    public static OutboxEventEntity fromDomain(OutboxEvent outboxEvent, Long orderId) {
         OutboxEventEntity entity = new OutboxEventEntity();
+        entity.orderId = orderId;
         entity.type = outboxEvent.getType();
         entity.payload = outboxEvent.getPayload();
         entity.status = outboxEvent.getStatus();
