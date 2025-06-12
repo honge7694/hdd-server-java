@@ -20,6 +20,9 @@ public class OrderRequestDto {
     @Schema(description = "유저 쿠폰 번호", example = "0")
     Long userCouponId;
 
+    @Schema(description = "주문 번호", example = "aaa-123")
+    String idempotencyKey;
+
     @Schema(description = "구매 상품")
     List<ProductRequestDto> productItems;
 }

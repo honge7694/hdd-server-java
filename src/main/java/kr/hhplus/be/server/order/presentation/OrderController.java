@@ -29,6 +29,7 @@ public class OrderController implements OrderDocs, PlaceOrderOutput {
         PlaceOrderCommand command = new PlaceOrderCommand(
                 orderRequestDto.getUserId(),
                 orderRequestDto.getUserCouponId(),
+                orderRequestDto.getIdempotencyKey(),
                 orderRequestDto.getProductItems().stream()
                         .map(ProductRequestDto::toDomain)
                         .collect(Collectors.toList())

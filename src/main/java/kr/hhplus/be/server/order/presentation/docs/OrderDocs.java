@@ -90,6 +90,16 @@ public interface OrderDocs {
                                     "data": null
                                 }
                         """))),
+            @ApiResponse(responseCode = "409", description = "주문이 완료되었습니다.",
+                    content = @Content(
+                            schema = @Schema(implementation = ApiResponse.class,
+                                    example = """
+                                {
+                                    "status": 409,
+                                    "message": "주문이 완료되었습니다.",
+                                    "data": null
+                                }
+                        """))),
     })
     @PostMapping("/v1/orderplace")
     ResponseEntity<kr.hhplus.be.server.global.response.ApiResponse<OrderResponseDto>> placeOrder(

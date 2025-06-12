@@ -71,8 +71,8 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository,
 
     @Override
     public Optional<OrderIdempotency> findByIdempotencyKey(String idempotencyKey) {
-        return orderIdempotencyJpaRepository.findByIdempotencyKey(idempotencyKey);
+        return orderIdempotencyJpaRepository
+                .findByIdempotencyKey(idempotencyKey)
+                .map(OrderIdempotencyEntity::toDomain);
     }
-
-
 }
