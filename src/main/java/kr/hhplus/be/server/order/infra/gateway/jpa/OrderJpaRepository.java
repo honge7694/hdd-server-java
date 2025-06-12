@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.order.infra.gateway;
+package kr.hhplus.be.server.order.infra.gateway.jpa;
 
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

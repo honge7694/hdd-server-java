@@ -2,6 +2,8 @@ package kr.hhplus.be.server.order.infra.gateway;
 
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderMessageRepository;
 import kr.hhplus.be.server.order.domain.OutboxEvent;
+import kr.hhplus.be.server.order.infra.gateway.custom.OrderRepositoryCustom;
+import kr.hhplus.be.server.order.infra.gateway.custom.OutboxRepositoryCustom;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderEntity;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderHistoryEntity;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderItemEntity;
@@ -9,11 +11,11 @@ import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OrderHistory;
 import kr.hhplus.be.server.order.domain.OrderItem;
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderRepository;
+import kr.hhplus.be.server.order.infra.gateway.jpa.OrderHistoryJpaRepository;
+import kr.hhplus.be.server.order.infra.gateway.jpa.OrderItemJpaRepository;
+import kr.hhplus.be.server.order.infra.gateway.jpa.OrderJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,9 +23,10 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository 
 
     private final OrderJpaRepository orderJpaRepository;
     private final OrderItemJpaRepository orderItemJpaRepository;
-    private final OrderHistoryRepository orderHistoryRepository;
+    private final OrderHistoryJpaRepository orderHistoryRepository;
 //    @Qualifier("orderRepositoryCustomImpl")
     private final OrderRepositoryCustom orderRepositoryCustom;
+    private final OutboxRepositoryCustom outboxRepositoryCustom;
 
     @Override
     public Order save(Order order) {
@@ -53,6 +56,6 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository 
 
     @Override
     public OutboxEvent findByOrderId(Long orderId) {
-        return orderRepositoryCustom.findByOrderId(orderId);
+        return outboxRepositoryCustom.findByOrderId(orderId);
     }
 }
