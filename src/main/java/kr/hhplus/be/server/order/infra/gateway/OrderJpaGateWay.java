@@ -50,4 +50,9 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository 
     public Order save(Order order, OutboxEvent event) {
         return orderRepositoryCustom.save(order, event);
     }
+
+    @Override
+    public OutboxEvent findByOrderId(Long orderId) {
+        return orderRepositoryCustom.findByOrderId(orderId);
+    }
 }

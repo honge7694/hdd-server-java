@@ -38,5 +38,10 @@ public class OutboxEventEntity {
         entity.createdAt = LocalDateTime.now();
         return entity;
     }
+
+    // 엔티티 -> 도메인 변환 메서드
+    public static OutboxEvent toDomain(OutboxEventEntity entity) {
+        return OutboxEvent.create(entity.getType(), entity.getPayload(), entity.getStatus());
+    }
 }
 

@@ -5,6 +5,7 @@ import kr.hhplus.be.server.order.domain.enums.OrderStatus;
 import java.time.LocalDateTime;
 
 public class OutboxEvent {
+    private Long orderId;
     private String type;
     private String payload;
     private OrderStatus status;
@@ -22,6 +23,10 @@ public class OutboxEvent {
     }
 
     /* Getter */
+    public Long getOrderId() {
+        return orderId;
+    }
+
     public String getType() {
         return type;
     }

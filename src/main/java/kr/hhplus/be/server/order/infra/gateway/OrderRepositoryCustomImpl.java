@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.order.infra.gateway;
 
 import jakarta.persistence.EntityManager;
+import kr.hhplus.be.server.global.exception.NotFoundException;
 import kr.hhplus.be.server.order.domain.Order;
 import kr.hhplus.be.server.order.domain.OutboxEvent;
 import kr.hhplus.be.server.order.infra.gateway.entity.OrderEntity;
@@ -26,5 +27,14 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         em.flush();
 
         return orderEntity.toDomain();
+    }
+
+    @Override
+    public OutboxEvent findByOrderId(Long orderId) {
+        OutboxEventEntity entity = em.find(OutboxEventEntity.class, orderId);
+        if (entity == null) {
+            throw new NotFoundException("주문을 찾을 수 없습니다. (orderId = " + orderId + ")");
+        }
+        return entity.toDomain(entity); // entity → 도메인 객체 변환
     }
 }

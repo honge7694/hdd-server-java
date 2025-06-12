@@ -5,4 +5,5 @@ import kr.hhplus.be.server.order.domain.OutboxEvent;
 
 public interface OrderMessageRepository {
     Order save(Order order, OutboxEvent event);
+    OutboxEvent findByOrderId(Long orderId);
 }
