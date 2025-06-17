@@ -11,6 +11,7 @@ import kr.hhplus.be.server.usercoupon.dto.UserCouponResponseDto;
 import kr.hhplus.be.server.usercoupon.model.UserCoupon;
 import kr.hhplus.be.server.usercoupon.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class UserCouponService {
 
         // 쿠폰 조회
         Long couponId = userCouponRequestDto.getCouponId();
-        Coupon coupon = couponRepository.findById(couponId)
+        Coupon coupon = couponRepository.findByWithLock(couponId)
                 .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
 
         // 쿠폰 저장
