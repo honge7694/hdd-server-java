@@ -20,11 +20,16 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,14 +75,14 @@ class UserCouponServiceTest {
     @BeforeAll
     void setUp() {
         // 쿠폰 생성
-        coupon = Coupon.create("test", "abc", 10000, 100, LocalDate.now(), LocalDate.now());
+        coupon = Coupon.create("test", "abc", 10000, 10000, LocalDate.now(), LocalDate.now());
         couponRepository.save(coupon);
 
         // 주소 생성
         address = new Address("city", "street", "zipcode");
 
         // 유저 생성
-        for(int i = 1; i <= 100; i++) {
+        for(int i = 1; i <= 1000; i++) {
             User user = User.create(
                     "test",
                     "test"+i+"@email.com",
@@ -91,20 +96,27 @@ class UserCouponServiceTest {
     }
 
     @Test
-    @DisplayName("동시에 100명의 유저가 쿠폰을 100개 등록")
+    @DisplayName("동시에 300명의 유저가 쿠폰을 1000개 등록")
     public void registerCoupon_Concurrent100Users_AllSuccess() throws InterruptedException {
 
-        int threadCount = 100;
+        int threadCount = 1000;
         ExecutorService executorService = Executors.newFixedThreadPool(100);
         CountDownLatch latch = new CountDownLatch(threadCount);
+
+        long startTime = System.nanoTime();
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
 
         for (int i = 1; i <= threadCount; i++) {
             final Long userId = (long) i;
             executorService.submit(() -> {
                 try {
                     userCouponService.registerUserCoupon(new UserCouponRequestDto(userId, coupon.getId()));
+                    successCount.incrementAndGet();
                 } catch (Exception e) {
                     System.out.println("e = " + e);
+                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }
@@ -116,7 +128,34 @@ class UserCouponServiceTest {
         List<UserCoupon> issued = userCouponRepository.findAll();
         Coupon updated = couponRepository.findById(coupon.getId()).orElseThrow();
 
-        assertEquals(100, issued.size());
-        assertEquals(0, updated.getQuantity());
+        assertEquals(1000, issued.size());
+        assertEquals(9000, updated.getQuantity());
+        long endTime = System.nanoTime();
+
+        long elapsedMs = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+
+        System.out.println("성공 수: " + successCount.get());
+        System.out.println("실패 수: " + failCount.get());
+        System.out.println("총 소요 시간(ms): " + elapsedMs);
+
+        // CSV 기록
+        writeResultToCSV("decreaseQuantity", threadCount, successCount.get(), failCount.get(), elapsedMs);
     }
+
+    private void writeResultToCSV(String strategy, int total, int success, int fail, long elapsedMs) {
+        String fileName = "performance_results.csv";
+        File file = new File(fileName);
+
+        boolean fileExists = file.exists();
+        try (FileWriter writer = new FileWriter(file, true)) {
+            if (!fileExists) {
+                writer.write("Strategy,TotalThreads,Success,Fail,ElapsedMs\n");
+            }
+            writer.write(String.format("%s,%d,%d,%d,%d\n",
+                    strategy, total, success, fail, elapsedMs));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

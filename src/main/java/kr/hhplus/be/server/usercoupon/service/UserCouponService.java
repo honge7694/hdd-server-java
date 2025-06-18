@@ -35,6 +35,13 @@ public class UserCouponService {
         Long couponId = userCouponRequestDto.getCouponId();
         Coupon coupon = couponRepository.findByWithLock(couponId)
                 .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
+//        Coupon coupon = couponRepository.findById(couponId)
+//                .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
+
+        int couponStock = couponRepository.decreaseQuantity(couponId);
+        if (couponStock == 0) {
+            throw new ConflictException("쿠폰이 모두 소진되었습니다.");
+        }
 
         // 쿠폰 저장
         if (userCouponRepository.existsByUserIdAndCouponId(user.getId(), coupon.getId())) {
