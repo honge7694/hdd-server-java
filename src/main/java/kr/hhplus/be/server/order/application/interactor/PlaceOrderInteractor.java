@@ -19,6 +19,7 @@ import kr.hhplus.be.server.product.model.Product;
 import kr.hhplus.be.server.product.repository.ProductRepository;
 import kr.hhplus.be.server.user.application.usecase.port.out.UserRepository;
 import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.usercoupon.repository.UserCouponRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,14 +37,18 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
     private final OrderMessageRepository orderMessageRepository;
     private final ObjectMapper objectMapper;
     private final OrderIdempotencyRepository orderIdempotencyRepository;
+    private final UserCouponRepository userCouponRepository;
+    private final IdempotencyService idempotencyService;
 
-    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMessageRepository orderMessageRepository, ObjectMapper objectMapper, OrderIdempotencyRepository orderIdempotencyRepository) {
+    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMessageRepository orderMessageRepository, ObjectMapper objectMapper, OrderIdempotencyRepository orderIdempotencyRepository, UserCouponRepository userCouponRepository, IdempotencyService idempotencyService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.orderMessageRepository = orderMessageRepository;
         this.objectMapper = objectMapper;
         this.orderIdempotencyRepository = orderIdempotencyRepository;
+        this.userCouponRepository = userCouponRepository;
+        this.idempotencyService = idempotencyService;
     }
 
     @Override
@@ -51,8 +56,7 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
     public void orderItemCommand(PlaceOrderCommand placeOrderCommand, PlaceOrderOutput present) throws JsonProcessingException {
 
         // 주문 중복 확인
-        orderIdempotencyRepository.findByIdempotencyKey(placeOrderCommand.idempotencyKey())
-                .ifPresent((it) -> { throw new ConflictException("주문이 완료되었습니다."); });
+        idempotencyService.checkAndSave(placeOrderCommand.idempotencyKey(), placeOrderCommand.userId());
 
         User user = userRepository.findById(placeOrderCommand.userId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
@@ -88,10 +92,6 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         // OrderHistory 생성
         OrderHistory orderHistory = OrderHistory.create(savedOrder.getId(), OrderStatus.ORDERED, LocalDateTime.now());
         orderRepository.save(orderHistory);
-
-        // orderIdempotency 저장
-        OrderIdempotency orderIdempotency = OrderIdempotency.create(user.getId(), placeOrderCommand.idempotencyKey());
-        orderIdempotencyRepository.save(orderIdempotency);
 
         present.ok(
                 new PlaceOrderResult(

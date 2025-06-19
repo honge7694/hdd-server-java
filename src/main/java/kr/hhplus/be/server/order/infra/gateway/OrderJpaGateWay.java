@@ -75,4 +75,10 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository,
                 .findByIdempotencyKey(idempotencyKey)
                 .map(OrderIdempotencyEntity::toDomain);
     }
+
+    @Override
+    public void saveAndFlush(OrderIdempotency orderIdempotency) {
+        OrderIdempotencyEntity orderIdempotencyEntity = OrderIdempotencyEntity.fromDomain(orderIdempotency);
+        orderIdempotencyJpaRepository.saveAndFlush(orderIdempotencyEntity);
+    }
 }
