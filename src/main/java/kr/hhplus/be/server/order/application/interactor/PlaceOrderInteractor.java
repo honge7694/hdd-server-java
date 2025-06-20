@@ -55,9 +55,6 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
     @Transactional
     public void orderItemCommand(PlaceOrderCommand placeOrderCommand, PlaceOrderOutput present) throws JsonProcessingException {
 
-        // 주문 중복 확인
-        idempotencyService.checkAndSave(placeOrderCommand.idempotencyKey(), placeOrderCommand.userId());
-
         User user = userRepository.findById(placeOrderCommand.userId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
 
@@ -73,11 +70,12 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         List<Product> productItems = new ArrayList<>();
         for(ProductItemCommand productItemCommand : placeOrderCommand.items()) {
             Long productId = productItemCommand.productId();
+//            Product product = productRepository.findByWithLock(productId)
+//                    .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다. (상품 ID : " + productId + ")"));
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다. (상품 ID : " + productId + ")"));
             product.reduceStock(productItemCommand.quantity());
             totalPrice += product.getPrice() * productItemCommand.quantity();
-            productRepository.save(product);
 
             productItems.add(product);
 
