@@ -19,6 +19,7 @@ public class OrderIdempotencyEntity {
 
     private Long userId;
 
+    @Column(unique = true)
     private String idempotencyKey;
 
     private LocalDateTime createdAt;

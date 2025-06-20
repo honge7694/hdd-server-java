@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface OrderIdempotencyRepository {
     OrderIdempotency save(OrderIdempotency orderIdempotency);
     Optional<OrderIdempotency> findByIdempotencyKey(String idempotencyKey);
+
+    void saveAndFlush(OrderIdempotency orderIdempotency);
 }

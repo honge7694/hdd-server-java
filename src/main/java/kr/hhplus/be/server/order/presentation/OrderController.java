@@ -2,6 +2,7 @@ package kr.hhplus.be.server.order.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import kr.hhplus.be.server.global.response.ApiResponse;
+import kr.hhplus.be.server.order.application.interactor.PlaceOrderFacade;
 import kr.hhplus.be.server.order.presentation.docs.OrderDocs;
 import kr.hhplus.be.server.order.presentation.dto.OrderRequestDto;
 import kr.hhplus.be.server.order.presentation.dto.OrderResponseDto;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class OrderController implements OrderDocs, PlaceOrderOutput {
 
     private final PlaceOrderInput placeOrderInput;
+    private final PlaceOrderFacade placeOrderFacade;
     private OrderResponseDto lastResponse;
 
     @Override
@@ -35,7 +37,8 @@ public class OrderController implements OrderDocs, PlaceOrderOutput {
                         .collect(Collectors.toList())
         );
 
-        placeOrderInput.orderItemCommand(command, this);
+//        placeOrderInput.orderItemCommand(command, this);
+        placeOrderFacade.orderWithRetry(command, this);
         return ResponseEntity.ok(ApiResponse.success(lastResponse));
     }
 

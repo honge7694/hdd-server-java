@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import kr.hhplus.be.server.global.exception.ConflictException;
 import lombok.Getter;
 
-import java.sql.SQLOutput;
-
 @Entity
 @Getter
 public class Product {
@@ -19,6 +17,9 @@ public class Product {
     private String brand;
     private int price;
     private int stockQuantity;
+
+    @Version
+    private Long version;
 
     protected Product() {}
 
