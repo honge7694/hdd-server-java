@@ -29,6 +29,10 @@ spring:
     url: jdbc:mysql://localhost:3307/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
     username: application
     password: application
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 springdoc:
   api-docs:
@@ -36,3 +40,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+
+lock:
+  max-retries: 10
