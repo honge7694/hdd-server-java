@@ -47,19 +47,10 @@ public class UserCouponDistributedLockServiceTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserCouponLockFacade userCouponLockFacade;
-
-    @Autowired
-    private UserCouponService userCouponService;
-
-    @Autowired
     private CouponRepository couponRepository;
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserCouponRepository userCouponRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -85,6 +76,10 @@ public class UserCouponDistributedLockServiceTest {
         // Redis
         registry.add("spring.redis.host", redisContainer::getHost);
         registry.add("spring.redis.port", () -> redisContainer.getMappedPort(6379).toString());
+
+        // Redisson
+        String redisUrl = String.format("redis://%s:%d", redisContainer.getHost(), redisContainer.getMappedPort(6379));
+        registry.add("spring.redisson.address", () -> redisUrl);
     }
 
     private Coupon coupon;

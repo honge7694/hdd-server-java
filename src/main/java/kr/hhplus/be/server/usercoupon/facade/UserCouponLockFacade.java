@@ -5,12 +5,15 @@ import kr.hhplus.be.server.usercoupon.dto.UserCouponResponseDto;
 import kr.hhplus.be.server.usercoupon.service.UserCouponService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -19,33 +22,34 @@ public class UserCouponLockFacade {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final UserCouponService userCouponService;
+    private final RedissonClient redissonClient;
 
     @Value("${lock.max-retries}")
     private int maxRetries;
 
     public UserCouponResponseDto registerUserCouponLock(UserCouponRequestDto userCouponRequestDto) throws InterruptedException {
         String lockKey = "lock:coupon:"+userCouponRequestDto.getCouponId();
-        Random random = new Random();
-        int randomValue = random.nextInt(401) + 100;
+        RLock lock = redissonClient.getLock(lockKey);
 
-        for (int i = 1; i <= maxRetries; i++) {
-            // lockKey가 없다면 lock을 등록
-            if (Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(5)))) {
-                try {
-                    // 쿠폰 등록
-                    return userCouponService.registerUserCoupon(userCouponRequestDto);
-                } finally {
-                    redisTemplate.delete(lockKey);
-                }
-            } else {
-                if (i == maxRetries) {
-                    throw new RuntimeException("최대 재시도 횟수 초과");
-                }
-                log.info("재시도 횟수 : {}", i);
-                Thread.sleep(randomValue);
+        try {
+            boolean isLocked = lock.tryLock(10, 15, TimeUnit.SECONDS);
+
+            // 락 획득에 실패한 경우
+            if (!isLocked) {
+                log.error("락 획득 실패, lockKey : {}", lockKey);
+                throw new RuntimeException("쿠폰 발급에 실패하였습니다.");
+            }
+
+            // 락 획득에 성공한 경우
+            return userCouponService.registerUserCoupon(userCouponRequestDto);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("락 대기 중 인터럽트 발생!", e);
+        } finally {
+            if (lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
             }
         }
-        throw new RuntimeException("쿠폰 발급 처리에 실패했습니다.");
     }
 }
 
