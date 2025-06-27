@@ -4,6 +4,11 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+// 컴파일 할 때 -parameters 옵션 추가
+tasks.withType<JavaCompile> {
+	options.compilerArgs.add("-parameters")
+}
+
 fun getGitHash(): String {
 	return providers.exec {
 		commandLine("git", "rev-parse", "--short", "HEAD")
@@ -52,7 +57,7 @@ dependencies {
 	implementation("org.redisson:redisson-spring-boot-starter:3.30.0")
 
 	// caffeine cache
-	implementation("com.github.ben-manes.caffeine:caffeine")
+//	implementation("com.github.ben-manes.caffeine:caffeine")
 
 	// Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")

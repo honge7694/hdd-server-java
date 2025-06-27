@@ -23,7 +23,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    @Cacheable(cacheNames = "products", key = "'products::' + #productId")
+    @Cacheable(cacheNames = "products", key = "#productId")
     public ProductResponseDto getProduct(long productId) {
         log.info("DB에서 쿠폰 조회 : {}", productId);
         return productRepository.findById(productId)

@@ -35,6 +35,8 @@ spring:
       port: 6379
   redisson:
     address: "redis://127.0.0.1:6379"
+  cache:
+    type: redis
 
 springdoc:
   api-docs:
