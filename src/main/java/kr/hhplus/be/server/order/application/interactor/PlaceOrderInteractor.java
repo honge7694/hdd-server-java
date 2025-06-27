@@ -20,6 +20,9 @@ import kr.hhplus.be.server.product.repository.ProductRepository;
 import kr.hhplus.be.server.user.application.usecase.port.out.UserRepository;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.usercoupon.repository.UserCouponRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PlaceOrderInteractor implements PlaceOrderInput {
 
@@ -39,8 +43,9 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
     private final OrderIdempotencyRepository orderIdempotencyRepository;
     private final UserCouponRepository userCouponRepository;
     private final IdempotencyService idempotencyService;
+    private final CacheManager cacheManager;
 
-    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMessageRepository orderMessageRepository, ObjectMapper objectMapper, OrderIdempotencyRepository orderIdempotencyRepository, UserCouponRepository userCouponRepository, IdempotencyService idempotencyService) {
+    public PlaceOrderInteractor(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, OrderMessageRepository orderMessageRepository, ObjectMapper objectMapper, OrderIdempotencyRepository orderIdempotencyRepository, UserCouponRepository userCouponRepository, IdempotencyService idempotencyService, CacheManager cacheManager) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
@@ -49,11 +54,14 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         this.orderIdempotencyRepository = orderIdempotencyRepository;
         this.userCouponRepository = userCouponRepository;
         this.idempotencyService = idempotencyService;
+        this.cacheManager = cacheManager;
     }
 
     @Override
     @Transactional
     public void orderItemCommand(PlaceOrderCommand placeOrderCommand, PlaceOrderOutput present) throws JsonProcessingException {
+        // 캐시
+        Cache productCache = cacheManager.getCache("products");
 
         User user = userRepository.findById(placeOrderCommand.userId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
@@ -75,6 +83,17 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new NotFoundException("해당 상품이 존재하지 않습니다. (상품 ID : " + productId + ")"));
             product.reduceStock(productItemCommand.quantity());
+
+            // 상품 캐시 제거
+            if (productCache != null) {
+                try {
+                    productCache.evict(productId);
+                    log.info("products::{} 캐시 제거", productId);
+                } catch (Exception e) {
+                    log.warn("products::{} 캐시 제거 중 에러 발생", productId);
+                }
+            }
+
             totalPrice += product.getPrice() * productItemCommand.quantity();
 
             productItems.add(product);
