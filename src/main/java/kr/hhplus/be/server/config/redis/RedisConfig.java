@@ -46,28 +46,20 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisCacheConfiguration cacheConfiguration(@Qualifier("cacheObjectMapper") ObjectMapper objectMapper) {
-
-        // 기본 캐시 설정 정의
-        return RedisCacheConfiguration.defaultCacheConfig()
-                // 키를 String으로 직렬화
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, @Qualifier("cacheObjectMapper") ObjectMapper objectMapper) {
+        // 기본 캐시 설정
+        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                // 값을 JSON 형태로 직렬화
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-                // 기본 TTL 30분
-                .entryTtl(Duration.ofMinutes(30));
-    }
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
 
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
-        // 캐시 정의
+        // 캐시 등록
         cacheConfigurations.put("products", redisCacheConfiguration.entryTtl(Duration.ofMinutes(1)));
 
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(redisCacheConfiguration) // 기본 캐시 정의
-                .withInitialCacheConfigurations(cacheConfigurations) // 개별 캐시 정의
+                .cacheDefaults(redisCacheConfiguration) // 기본 설정
+                .withInitialCacheConfigurations(cacheConfigurations) // 개별 캐시 설정 목록
                 .build();
     }
 
