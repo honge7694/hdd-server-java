@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.global.response.ApiResponse;
 import kr.hhplus.be.server.usercoupon.dto.UserCouponRequestDto;
 import kr.hhplus.be.server.usercoupon.dto.UserCouponResponseDto;
+import kr.hhplus.be.server.usercoupon.facade.UserCouponLockFacade;
 import kr.hhplus.be.server.usercoupon.service.UserCouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserCouponController {
 
     private final UserCouponService userCouponService;
+    private final UserCouponLockFacade userCouponLockfacade;
 
     @Operation(
             summary = "유저 쿠폰 등록 API",
@@ -82,7 +84,8 @@ public class UserCouponController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserCouponResponseDto>> getUserCoupon(
             @RequestBody UserCouponRequestDto userCouponRequestDto
-    ) {
-        return ResponseEntity.ok(ApiResponse.success(userCouponService.registerUserCoupon(userCouponRequestDto)));
+    ) throws InterruptedException {
+//        return ResponseEntity.ok(ApiResponse.success(userCouponService.registerUserCoupon(userCouponRequestDto)));
+        return ResponseEntity.ok(ApiResponse.success(userCouponLockfacade.registerUserCouponLock(userCouponRequestDto)));
     }
 }
