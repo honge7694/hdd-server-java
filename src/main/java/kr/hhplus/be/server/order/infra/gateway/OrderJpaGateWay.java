@@ -53,6 +53,11 @@ public class OrderJpaGateWay implements OrderRepository, OrderMessageRepository,
     }
 
     @Override
+    public int findAllSize() {
+        return orderJpaRepository.findAll().size();
+    }
+
+    @Override
     public Order save(Order order, OutboxEvent event) {
         return orderRepositoryCustom.save(order, event);
     }
