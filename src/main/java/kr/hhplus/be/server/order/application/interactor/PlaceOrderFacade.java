@@ -26,14 +26,15 @@ public class PlaceOrderFacade {
         // 분산락을 통해 유저당 1개의 주문만 가능(주문 중복 방지)
         String lockKey = "lock:order:user"+placeOrderCommand.userId();
         RLock lock = redissonClient.getLock(lockKey);
-
+        log.info("Thread: {} - 락 획득 시도. Key: {}", Thread.currentThread().getName(), lockKey);
         try {
-            boolean isLocked = lock.tryLock(5, TimeUnit.SECONDS);
+            boolean isLocked = lock.tryLock(0, TimeUnit.SECONDS);
 
             if (!isLocked) {
                 log.error("유저 중복 주문 요청 감지, lockKey : {}", lockKey);
                 throw new IllegalStateException("이미 주문을 처리 중 입니다.");
             }
+            log.info("Thread: {} - 락 획득 성공! Key: {}", Thread.currentThread().getName(), lockKey);
             executeWithOptimisticLockRetry(placeOrderCommand, placeOrderOutput);
         } catch (InterruptedException e) {
             log.error("주문 처리 중 오류가 발생하였습니다.");
@@ -41,6 +42,7 @@ public class PlaceOrderFacade {
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
+                log.info("Thread: {} - 락 해제. Key: {}", Thread.currentThread().getName(), lockKey);
             }
         }
     }
