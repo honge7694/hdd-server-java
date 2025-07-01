@@ -33,15 +33,17 @@ public class UserCouponService {
 
         // 쿠폰 조회
         Long couponId = userCouponRequestDto.getCouponId();
-//        Coupon coupon = couponRepository.findByWithLock(couponId)
-//                .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
 
-        int couponStock = couponRepository.decreaseQuantity(couponId);
-        if (couponStock == 0) {
-            throw new ConflictException("쿠폰이 모두 소진되었습니다.");
-        }
+        // 비관적 락
+//        Coupon coupon = couponRepository.findByWithLock(couponId)
+//                .orElseThrow(() -> new NotFoundException("해당 쿠폰이 존재하지 않습니다."));
+        // 낙관적 락 (원자적 업데이트)
+//        int couponStock = couponRepository.decreaseQuantity(couponId);
+//        if (couponStock == 0) {
+//            throw new ConflictException("쿠폰이 모두 소진되었습니다.");
+//        }
 
         // 쿠폰 저장
         if (userCouponRepository.existsByUserIdAndCouponId(user.getId(), coupon.getId())) {
@@ -49,7 +51,7 @@ public class UserCouponService {
         }
         UserCoupon userCoupon = UserCoupon.create(user.getId(), coupon.getId());
         userCouponRepository.save(userCoupon);
-//        coupon.reduceCoupon();
+        coupon.reduceCoupon();
 
         return new UserCouponResponseDto(
                 userCoupon.getId(),
