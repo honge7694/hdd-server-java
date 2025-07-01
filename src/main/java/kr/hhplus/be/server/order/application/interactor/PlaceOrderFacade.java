@@ -37,7 +37,7 @@ public class PlaceOrderFacade {
             log.info("Thread: {} - 락 획득 성공! Key: {}", Thread.currentThread().getName(), lockKey);
             executeWithOptimisticLockRetry(placeOrderCommand, placeOrderOutput);
         } catch (InterruptedException e) {
-            log.error("주문 처리 중 오류가 발생하였습니다.");
+            log.error("주문 처리 중 오류가 발생하였습니다. error : {}", Thread.currentThread());
             throw new RuntimeException(e);
         } finally {
             if (lock.isLocked() && lock.isHeldByCurrentThread()) {
