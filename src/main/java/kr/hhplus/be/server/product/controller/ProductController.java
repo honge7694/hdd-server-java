@@ -30,4 +30,10 @@ public class ProductController implements ProductDocs {
         return ResponseEntity.status(200)
                 .body(ApiResponse.success(productService.getProducts(pageable)));
     }
+
+    @Override
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProductRanking(String date) {
+        return ResponseEntity.status(200)
+                .body(ApiResponse.success(productService.getProductRanking(date)));
+    }
 }

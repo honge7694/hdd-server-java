@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 @RequestMapping("/products")
 @Tag(name = "상품")
 public interface ProductDocs {
@@ -127,5 +129,14 @@ public interface ProductDocs {
     @GetMapping("/v1")
     ResponseEntity<kr.hhplus.be.server.global.response.ApiResponse<Page<ProductResponseDto>>> getProducts(
             @ParameterObject Pageable pageable
+    );
+
+    @Operation(
+            summary = "상품 랭킹 조회 API",
+            description = "상품 랭킹을 날짜(yyyy-MM-dd)를 통하여 조회합니다."
+    )
+    @GetMapping("/v1/ranking")
+    ResponseEntity<kr.hhplus.be.server.global.response.ApiResponse<List<ProductResponseDto>>> getProductRanking(
+            @Parameter String date
     );
 }
