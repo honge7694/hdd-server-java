@@ -11,10 +11,12 @@ import kr.hhplus.be.server.usercoupon.dto.UserCouponResponseDto;
 import kr.hhplus.be.server.usercoupon.model.UserCoupon;
 import kr.hhplus.be.server.usercoupon.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserCouponService {
@@ -22,6 +24,9 @@ public class UserCouponService {
     private final UserRepository userRepository;
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final String COUPON_APPLICANTS_KEY_PREFIX = "coupon:applicants:";
+    private static final String COUPON_QUEUE_KEY = "coupon:issue:queue";
 
     @Transactional
     public UserCouponResponseDto registerUserCoupon(UserCouponRequestDto userCouponRequestDto) {
@@ -60,5 +65,27 @@ public class UserCouponService {
                 userCoupon.getUsed(),
                 userCoupon.getCreatedAt()
         );
+    }
+
+    /**
+     * 쿠폰 발급 요청을 Redis 큐에 추가합니다.
+     *
+     * @param userId    요청한 유저 ID
+     * @param couponId  발급 받을 쿠폰 ID
+     */
+    public void queueCouponRequest(Long userId, Long couponId) {
+        log.info("queue에 쿠폰 발급 요청을 전달 받았습니다.");
+        String applicantsKey = COUPON_APPLICANTS_KEY_PREFIX + couponId;
+
+        // 이미 멤버가 존재하면 0을 반환합니다.
+        Long addedCount = redisTemplate.opsForSet().add(applicantsKey, String.valueOf(userId));
+
+        if (addedCount == null || addedCount == 0) {
+            throw new ConflictException("이미 해당 쿠폰을 발급받았거나, 요청 중입니다.");
+        }
+
+        // 큐에 삽입
+        String requestPayload = "{\"userId\":" + userId + ", \"couponId\":" + couponId + "}";
+        redisTemplate.opsForList().leftPush(COUPON_QUEUE_KEY, requestPayload);
     }
 }
