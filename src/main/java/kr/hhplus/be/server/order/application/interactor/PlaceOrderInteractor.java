@@ -96,7 +96,7 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         OrderHistory orderHistory = OrderHistory.create(savedOrder.getId(), OrderStatus.ORDERED, LocalDateTime.now());
         orderRepository.save(orderHistory);
 
-        // 캐시 제거 이벤트 발생
+        // 캐시 제거 이벤트 발생, 가장 많이 주문한 상품 순위
         eventPublisher.publishEvent(
                 new OrderCompletedEvent(placeOrderCommand.items().stream().map(ProductItemCommand::productId)
                         .collect(Collectors.toList())));

@@ -6,12 +6,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.coupon.dto.CouponRequestDto;
+import kr.hhplus.be.server.global.exception.ConflictException;
 import kr.hhplus.be.server.global.response.ApiResponse;
 import kr.hhplus.be.server.usercoupon.dto.UserCouponRequestDto;
 import kr.hhplus.be.server.usercoupon.dto.UserCouponResponseDto;
 import kr.hhplus.be.server.usercoupon.facade.UserCouponLockFacade;
 import kr.hhplus.be.server.usercoupon.service.UserCouponService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,5 +90,15 @@ public class UserCouponController {
     ) throws InterruptedException {
 //        return ResponseEntity.ok(ApiResponse.success(userCouponService.registerUserCoupon(userCouponRequestDto)));
         return ResponseEntity.ok(ApiResponse.success(userCouponLockfacade.registerUserCouponLock(userCouponRequestDto)));
+    }
+
+    @Operation(
+            summary = "유저 쿠폰 등록 API",
+            description = "쿠폰 등록"
+    )
+    @PostMapping("/v1/queue")
+    public ResponseEntity<ApiResponse<String>> requestCoupon(@RequestBody UserCouponRequestDto userCouponRequestDto) {
+        userCouponService.queueCouponRequest(userCouponRequestDto.getUserId(), userCouponRequestDto.getCouponId());
+        return ResponseEntity.ok(ApiResponse.success("쿠폰 발급이 완료되었습니다."));
     }
 }
