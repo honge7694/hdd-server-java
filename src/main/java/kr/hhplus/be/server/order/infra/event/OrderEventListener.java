@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.order.application.handler;
+package kr.hhplus.be.server.order.infra.event;
 
 import kr.hhplus.be.server.order.domain.OrderCompletedEvent;
 import lombok.RequiredArgsConstructor;
