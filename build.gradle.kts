@@ -56,6 +56,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.redisson:redisson-spring-boot-starter:3.30.0")
 
+	// webclient 추가
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
+
 	// caffeine cache
 //	implementation("com.github.ben-manes.caffeine:caffeine")
 
