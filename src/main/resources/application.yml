@@ -7,7 +7,7 @@ spring:
     name: HangHaePlusDataSource
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
-      maximum-pool-size: 200
+      maximum-pool-size: 10
       connection-timeout: 10000
       max-lifetime: 60000
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -26,15 +26,15 @@ spring.config.activate.on-profile: local, test
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3307/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
     username: application
     password: application
   data:
     redis:
       host: 127.0.0.1
-      port: 6379
+      port: 6380
   redisson:
-    address: "redis://127.0.0.1:6379"
+    address: "redis://127.0.0.1:6380"
   cache:
     type: redis
 

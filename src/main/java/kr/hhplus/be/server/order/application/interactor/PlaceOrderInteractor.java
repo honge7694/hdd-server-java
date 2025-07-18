@@ -11,6 +11,7 @@ import kr.hhplus.be.server.order.application.usecase.port.out.OrderIdempotencyRe
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderMessageRepository;
 import kr.hhplus.be.server.order.application.usecase.port.out.OrderRepository;
 import kr.hhplus.be.server.order.application.usecase.port.out.PlaceOrderOutput;
+import kr.hhplus.be.server.order.application.usecase.port.result.OrderData;
 import kr.hhplus.be.server.order.application.usecase.port.result.PlaceOrderResult;
 import kr.hhplus.be.server.order.application.usecase.port.result.dto.ProductItem;
 import kr.hhplus.be.server.order.domain.*;
@@ -100,6 +101,25 @@ public class PlaceOrderInteractor implements PlaceOrderInput {
         eventPublisher.publishEvent(
                 new OrderCompletedEvent(placeOrderCommand.items().stream().map(ProductItemCommand::productId)
                         .collect(Collectors.toList())));
+
+        // MockApi Event
+        OrderData orderData = new OrderData(
+                savedOrder.getId(),
+                productItems.stream().map(product -> {
+                    int quantity = placeOrderCommand.items().stream()
+                            .filter(cmd -> cmd.productId().equals(product.getId()))
+                            .findFirst()
+                            .map(ProductItemCommand::quantity)
+                            .orElse(0);
+
+                    return new ProductItem(
+                            product.getId(),
+                            product.getName(),
+                            product.getPrice(),
+                            quantity
+                    );
+                }).collect(Collectors.toList()));
+        eventPublisher.publishEvent(new OrderCompletedDataPlatformEvent(this, orderData));
 
         present.ok(
                 new PlaceOrderResult(
