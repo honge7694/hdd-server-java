@@ -1,0 +1,40 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+
+  # 데이터베이스 (MySQL) 설정
+  datasource:
+    url: jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
+    username: application
+    password: application
+
+  # 데이터 (Redis, Redisson) 설정
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6380
+    redisson:
+      address: "redis://127.0.0.1:6380"
+
+  # Spring Cache 설정
+  cache:
+    type: redis
+
+  # Kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    # Producer 설정
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    # Consumer 설정
+    consumer:
+      group-id: product-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
