@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "kr.hhplus.be.server.orderservice"
+group = "kr.hhplus.be.server.userservice"
 version = "0.0.1-SNAPSHOT"
 
 java {
