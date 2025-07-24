@@ -1,0 +1,40 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: usercoupon-service
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/hhplus?characterEncoding=UTF-8&serverTimezone=UTC
+    username: application
+    password: application
+
+  # ??? (Redis, Redisson) ??
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6380
+    redisson:
+      address: "redis://127.0.0.1:6380"
+
+  # Spring Cache ??
+  cache:
+    type: redis
+
+  # Kafka ??
+  kafka:
+    bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    # Producer ??
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    # Consumer ??
+    consumer:
+      group-id: usercoupon-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
